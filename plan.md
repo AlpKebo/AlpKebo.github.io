@@ -22,15 +22,7 @@ Konsept: **"mürekkep ve kağıt, koyu mavide"** — kişisel site bir portfolyo
 - **ASCII otoportre:** Sağdaki çerçeveli kartta duran portre statik bir resim değil; her karede sinüs dalgalarıyla yeniden hesaplanan üretken (generative) ASCII sanatı. Mürekkep suda dalgalanıyormuş gibi hareket ediyor.
 - **Responsive:** 900px altında tek sütuna geçiyor, oyun kanvası ekrana göre ölçekleniyor.
 
-## 3. Bana özel dokunuş: oynanabilir "otoportre"
-
-Sloganım "I hide small games in the things I make" — site de bunu bizzat yapıyor:
-
-- **Play →** butonuna basınca arka planı buğulayan bir pencerede **mürekkep temalı yılan oyunu** açılıyor.
-- Oyun sitenin estetiğiyle aynı dili konuşuyor: yem bir ✦ yıldızı, yılan kuyruğa doğru solan mürekkep blokları, oyun bitince italik serif "fin." yazısı.
-- **UX detayları:** Oyun açılır açılmaz yılan koşmaya başlamıyor — ilk yön tuşuna/kaydırmaya kadar bekliyor (kimse daha yönelemeden ölmesin). Klavye (ok tuşları + WASD), mobilde kaydırma destekli. En iyi skor `localStorage`'da saklanıyor. Escape, ✕ veya pencere dışına tıklamayla kapanıyor.
-
-## 4. Teknik mimari
+## 3. Teknik mimari
 
 - **Tek dosya, sıfır bağımlılık:** Her şey `index.html` içinde — framework yok, kütüphane yok, harici istek yok. Sayfa aniden yükleniyor.
 - **3 bağımsız modül** (IIFE olarak izole):
