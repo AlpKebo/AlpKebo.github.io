@@ -1,0 +1,551 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Alp Küçükkebabçı</title>
+<style>
+  :root {
+    --paper: #0e1a2b;
+    --card: #14243a;
+    --ink: #e9ecf2;
+    --ink-soft: #9fadc4;
+    --ink-faint: #51617d;
+    --line: #24354f;
+    --accent: #c8d3e6;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  html, body { height: 100%; }
+
+  body {
+    background: var(--paper);
+    color: var(--ink);
+    font-family: Georgia, 'Times New Roman', serif;
+    overflow-x: hidden;
+  }
+
+  #bg {
+    position: fixed;
+    inset: 0;
+    z-index: 0;
+    pointer-events: none;
+  }
+
+  .page {
+    position: relative;
+    z-index: 1;
+    max-width: 1180px;
+    margin: 0 auto;
+    padding: 48px 40px 80px;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+  }
+
+  nav {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    font-family: 'Courier New', monospace;
+    font-size: 13px;
+    letter-spacing: 0.14em;
+    color: var(--ink-soft);
+    text-transform: uppercase;
+  }
+
+  nav .mark { font-weight: bold; }
+
+  main {
+    flex: 1;
+    display: grid;
+    grid-template-columns: minmax(0, 1.25fr) minmax(0, 0.9fr);
+    gap: 64px;
+    align-items: center;
+    padding-top: 40px;
+  }
+
+  h1 {
+    font-size: clamp(40px, 6.6vw, 88px);
+    line-height: 0.98;
+    font-weight: 700;
+    letter-spacing: -0.01em;
+    background: linear-gradient(135deg, var(--ink) 30%, #6d80a0 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+
+  .tagline {
+    margin-top: 34px;
+    font-size: clamp(17px, 1.6vw, 21px);
+    line-height: 1.55;
+    color: var(--ink-soft);
+    max-width: 30em;
+    font-style: italic;
+  }
+
+  .actions {
+    margin-top: 38px;
+    display: flex;
+    align-items: center;
+    gap: 26px;
+    flex-wrap: wrap;
+  }
+
+  .pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 14px;
+    padding: 16px 30px;
+    border: 1px solid var(--line);
+    border-radius: 999px;
+    background: rgba(20, 36, 58, 0.65);
+    color: var(--ink);
+    font-size: 18px;
+    font-weight: 700;
+    text-decoration: none;
+    cursor: pointer;
+    font-family: inherit;
+    transition: transform 0.25s ease, box-shadow 0.25s ease;
+  }
+
+  .pill .arrow { transition: transform 0.25s ease; }
+
+  .pill:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 28px rgba(0, 0, 0, 0.4);
+  }
+
+  .pill:hover .arrow { transform: translateX(5px); }
+
+  .socials {
+    display: flex;
+    gap: 20px;
+  }
+
+  .socials a {
+    color: var(--ink);
+    display: inline-flex;
+    padding: 6px;
+    border-radius: 8px;
+    transition: transform 0.2s ease, opacity 0.2s ease;
+    opacity: 0.85;
+  }
+
+  .socials a:hover { transform: translateY(-3px); opacity: 1; }
+
+  .socials svg { width: 26px; height: 26px; }
+
+  /* framed cards, echoing the portrait frame of classic personal pages */
+  .frame {
+    background: var(--card);
+    border: 1px solid var(--line);
+    box-shadow: 10px 12px 0 rgba(0, 0, 0, 0.3);
+    padding: 18px;
+    position: relative;
+  }
+
+  .frame::before, .frame::after {
+    content: "❋";
+    position: absolute;
+    color: var(--ink-faint);
+    font-size: 14px;
+  }
+  .frame::before { top: 6px; left: 8px; }
+  .frame::after  { bottom: 6px; right: 8px; }
+
+  .frame-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    font-family: 'Courier New', monospace;
+    font-size: 12px;
+    letter-spacing: 0.12em;
+    color: var(--ink-soft);
+    text-transform: uppercase;
+    padding: 0 2px 10px;
+  }
+
+  .frame-foot {
+    padding: 10px 2px 0;
+    font-family: 'Courier New', monospace;
+    font-size: 12px;
+    color: var(--ink-faint);
+    text-align: center;
+    letter-spacing: 0.08em;
+  }
+
+  /* ascii self-portrait in the hero */
+  .portrait { justify-self: center; }
+
+  #ascii {
+    font-family: 'Courier New', monospace;
+    font-size: 9px;
+    line-height: 1.05;
+    letter-spacing: 0.05em;
+    color: var(--ink-soft);
+    user-select: none;
+  }
+
+  /* game overlay, opened by the Play button */
+  .overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 10;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    background: rgba(8, 15, 27, 0.82);
+    backdrop-filter: blur(4px);
+  }
+
+  .overlay.open { display: flex; }
+
+  .overlay .frame { animation: rise 0.35s ease; }
+
+  @keyframes rise {
+    from { transform: translateY(16px); opacity: 0; }
+    to   { transform: none; opacity: 1; }
+  }
+
+  .close {
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-family: 'Courier New', monospace;
+    font-size: 14px;
+    letter-spacing: 0.12em;
+    color: var(--ink-soft);
+    text-transform: uppercase;
+  }
+
+  .close:hover { color: var(--ink); }
+
+  #game {
+    display: block;
+    background: var(--paper);
+    border: 1px solid var(--line);
+    cursor: pointer;
+    touch-action: none;
+  }
+
+  footer {
+    padding-top: 60px;
+    font-family: 'Courier New', monospace;
+    font-size: 12px;
+    letter-spacing: 0.12em;
+    color: var(--ink-faint);
+    display: flex;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  @media (max-width: 900px) {
+    main {
+      grid-template-columns: 1fr;
+      gap: 48px;
+      padding-top: 24px;
+    }
+    .portrait { justify-self: start; }
+    .page { padding: 32px 22px 60px; }
+    #game { width: min(78vw, 360px); height: min(78vw, 360px); }
+  }
+</style>
+</head>
+<body>
+<canvas id="bg"></canvas>
+
+<div class="page">
+  <nav>
+    <span class="mark">AK — EST. 2026</span>
+    <span>ISTANBUL, TR</span>
+  </nav>
+
+  <main>
+    <section>
+      <h1>Alp<br>Küçükkebabçı</h1>
+      <p class="tagline">Student &amp; builder. I learn by making things —
+        and I hide small games in the things I make.</p>
+
+      <div class="actions">
+        <button class="pill" id="playBtn">Play <span class="arrow">→</span></button>
+
+        <div class="socials">
+          <a href="https://github.com/AlpKebo" aria-label="GitHub" title="GitHub">
+            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 .5C5.65.5.5 5.65.5 12c0 5.08 3.29 9.39 7.86 10.91.58.11.79-.25.79-.55v-2.17c-3.2.7-3.87-1.36-3.87-1.36-.52-1.33-1.28-1.68-1.28-1.68-1.04-.71.08-.7.08-.7 1.15.08 1.76 1.18 1.76 1.18 1.03 1.76 2.69 1.25 3.35.96.1-.75.4-1.25.72-1.54-2.55-.29-5.24-1.28-5.24-5.68 0-1.26.45-2.28 1.18-3.09-.12-.29-.51-1.46.11-3.05 0 0 .96-.31 3.15 1.18a10.9 10.9 0 0 1 5.74 0c2.19-1.49 3.15-1.18 3.15-1.18.62 1.59.23 2.76.11 3.05.74.81 1.18 1.83 1.18 3.09 0 4.41-2.69 5.38-5.26 5.66.41.36.78 1.06.78 2.14v3.17c0 .31.21.67.8.55A11.51 11.51 0 0 0 23.5 12C23.5 5.65 18.35.5 12 .5z"/></svg>
+          </a>
+          <a href="https://instagram.com/alpkucukkebabci" aria-label="Instagram" title="Instagram">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="2.5" y="2.5" width="19" height="19" rx="5.5"/><circle cx="12" cy="12" r="4.5"/><circle cx="17.6" cy="6.4" r="1.3" fill="currentColor" stroke="none"/></svg>
+          </a>
+          <a href="https://www.linkedin.com/in/alp-k%C3%BC%C3%A7%C3%BCkkebab%C3%A7%C4%B1-414961425/" aria-label="LinkedIn" title="LinkedIn">
+            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M20.45 20.45h-3.55v-5.57c0-1.33-.03-3.04-1.85-3.04-1.86 0-2.14 1.45-2.14 2.94v5.67H9.36V9h3.41v1.56h.05c.47-.9 1.63-1.85 3.36-1.85 3.6 0 4.27 2.37 4.27 5.45v6.29zM5.34 7.43a2.06 2.06 0 1 1 0-4.12 2.06 2.06 0 0 1 0 4.12zM7.12 20.45H3.55V9h3.57v11.45zM22.22 0H1.77C.79 0 0 .77 0 1.72v20.55C0 23.23.79 24 1.77 24h20.45c.98 0 1.78-.77 1.78-1.73V1.72C24 .77 23.2 0 22.22 0z"/></svg>
+          </a>
+        </div>
+      </div>
+    </section>
+
+    <aside class="frame portrait">
+      <div class="frame-head">
+        <span>· self-portrait ·</span>
+        <span>№ 01</span>
+      </div>
+      <pre id="ascii" aria-hidden="true"></pre>
+      <div class="frame-foot">ink on paper, in motion</div>
+    </aside>
+  </main>
+
+  <footer>
+    <span>© 2026 ALP KÜÇÜKKEBABÇI</span>
+    <span>MADE WITH INK &amp; PIXELS</span>
+  </footer>
+</div>
+
+<div class="overlay" id="overlay">
+  <div class="frame">
+    <div class="frame-head">
+      <span id="score">SCORE 00</span>
+      <button class="close" id="closeBtn">✕ close</button>
+    </div>
+    <canvas id="game" width="360" height="360"></canvas>
+    <div class="frame-foot" id="hint">arrows / WASD / swipe to steer</div>
+  </div>
+</div>
+
+<script>
+/* ---------- flowing-lines background, drifting gently with the pointer ---------- */
+(function () {
+  const canvas = document.getElementById('bg');
+  const ctx = canvas.getContext('2d');
+  let w, h, t = 0;
+  const mouse = { x: 0.5, y: 0.5 };
+
+  function resize() {
+    w = canvas.width = innerWidth;
+    h = canvas.height = innerHeight;
+  }
+  resize();
+  addEventListener('resize', resize);
+  addEventListener('pointermove', e => {
+    mouse.x = e.clientX / w;
+    mouse.y = e.clientY / h;
+  });
+
+  function draw() {
+    ctx.clearRect(0, 0, w, h);
+    t += 0.0022;
+    const lines = 26;
+    for (let i = 0; i < lines; i++) {
+      const p = i / lines;
+      ctx.beginPath();
+      ctx.strokeStyle = 'rgba(233,236,242,' + (0.035 + p * 0.06) + ')';
+      ctx.lineWidth = 1;
+      for (let x = -40; x <= w + 40; x += 14) {
+        const nx = x / w;
+        const y = h * (0.15 + p * 1.05)
+          - nx * h * 0.55
+          + Math.sin(nx * 4.5 + t * 2 + i * 0.35) * 26
+          + (mouse.y - 0.5) * 60 * Math.sin(nx * 3 + i)
+          + (mouse.x - 0.5) * 40 * (p - 0.5);
+        x === -40 ? ctx.moveTo(x, y) : ctx.lineTo(x, y);
+      }
+      ctx.stroke();
+    }
+    requestAnimationFrame(draw);
+  }
+  draw();
+})();
+
+/* ---------- generative ascii self-portrait: slow ripples of ink ---------- */
+(function () {
+  const el = document.getElementById('ascii');
+  const GLYPHS = ' .·:-=+*#%@';
+  const COLS = 46, ROWS = 30;
+  let t = 0;
+
+  function frame() {
+    t += 0.012;
+    let out = '';
+    for (let y = 0; y < ROWS; y++) {
+      for (let x = 0; x < COLS; x++) {
+        const u = (x / COLS - 0.5) * 2;
+        const v = (y / ROWS - 0.5) * 2;
+        const d = Math.sqrt(u * u * 1.15 + v * v);
+        // layered ripples loosely tracing a head-and-shoulders silhouette
+        const head = Math.exp(-Math.pow(d * 2.1, 2)) * 1.15;
+        const torso = v > 0.25 ? Math.exp(-Math.pow(u * 1.6, 2)) * (v - 0.25) * 1.4 : 0;
+        const ripple = Math.sin(d * 9 - t * 2.4) * 0.22 + Math.sin(u * 6 + t) * 0.08;
+        const ink = Math.max(0, Math.min(0.999, head + torso + ripple - 0.18));
+        out += GLYPHS[Math.floor(ink * GLYPHS.length)];
+      }
+      out += '\n';
+    }
+    el.textContent = out;
+    requestAnimationFrame(frame);
+  }
+  frame();
+})();
+
+/* ---------- snake, drawn in ink, opened from the Play button ---------- */
+(function () {
+  const canvas = document.getElementById('game');
+  const ctx = canvas.getContext('2d');
+  const scoreEl = document.getElementById('score');
+  const hintEl = document.getElementById('hint');
+  const playBtn = document.getElementById('playBtn');
+  const overlay = document.getElementById('overlay');
+  const closeBtn = document.getElementById('closeBtn');
+
+  const CELLS = 18;
+  const SIZE = canvas.width / CELLS;
+  let snake, dir, nextDir, food, score, best, timer, alive = false, waiting = false;
+
+  best = +(localStorage.getItem('ak-best') || 0);
+
+  function reset() {
+    snake = [{ x: 5, y: 9 }, { x: 4, y: 9 }, { x: 3, y: 9 }];
+    dir = { x: 1, y: 0 };
+    nextDir = dir;
+    score = 0;
+    placeFood();
+    scoreEl.textContent = 'SCORE 00';
+  }
+
+  function placeFood() {
+    do {
+      food = { x: Math.floor(Math.random() * CELLS), y: Math.floor(Math.random() * CELLS) };
+    } while (snake.some(s => s.x === food.x && s.y === food.y));
+  }
+
+  /* set the board up but wait for the first steer, so nobody dies before they orient */
+  function prepare() {
+    if (alive) return;
+    reset();
+    waiting = true;
+    hintEl.textContent = 'press an arrow / swipe to begin';
+    render(false);
+  }
+
+  function begin() {
+    waiting = false;
+    alive = true;
+    hintEl.textContent = 'arrows / WASD / swipe to steer';
+    clearInterval(timer);
+    timer = setInterval(tick, 110);
+  }
+
+  function stop() {
+    alive = false;
+    waiting = false;
+    clearInterval(timer);
+  }
+
+  function gameOver() {
+    stop();
+    best = Math.max(best, score);
+    localStorage.setItem('ak-best', best);
+    hintEl.textContent = 'score ' + score + ' · best ' + best + ' — click to play again';
+    render(true);
+  }
+
+  function tick() {
+    dir = nextDir;
+    const head = { x: snake[0].x + dir.x, y: snake[0].y + dir.y };
+    if (head.x < 0 || head.y < 0 || head.x >= CELLS || head.y >= CELLS ||
+        snake.some(s => s.x === head.x && s.y === head.y)) {
+      return gameOver();
+    }
+    snake.unshift(head);
+    if (head.x === food.x && head.y === food.y) {
+      score++;
+      scoreEl.textContent = 'SCORE ' + String(score).padStart(2, '0');
+      placeFood();
+    } else {
+      snake.pop();
+    }
+    render(false);
+  }
+
+  function render(dead) {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+    // faint dotted grid, like laid paper
+    ctx.fillStyle = 'rgba(233,236,242,0.12)';
+    for (let x = 1; x < CELLS; x++)
+      for (let y = 1; y < CELLS; y++)
+        ctx.fillRect(x * SIZE - 1, y * SIZE - 1, 1.5, 1.5);
+
+    // food as a small star glyph
+    ctx.fillStyle = '#e9ecf2';
+    ctx.font = (SIZE * 0.9) + 'px Georgia';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText('✦', food.x * SIZE + SIZE / 2, food.y * SIZE + SIZE / 2 + 1);
+
+    // snake as ink blocks fading toward the tail
+    snake.forEach((s, i) => {
+      const a = dead ? 0.25 : 0.9 - (i / snake.length) * 0.55;
+      ctx.fillStyle = 'rgba(233,236,242,' + a + ')';
+      const pad = 1.5;
+      ctx.fillRect(s.x * SIZE + pad, s.y * SIZE + pad, SIZE - pad * 2, SIZE - pad * 2);
+    });
+
+    if (dead) {
+      ctx.fillStyle = '#e9ecf2';
+      ctx.font = 'italic 26px Georgia';
+      ctx.fillText('fin.', canvas.width / 2, canvas.height / 2);
+    }
+  }
+
+  function openGame() {
+    overlay.classList.add('open');
+    prepare();
+  }
+
+  function closeGame() {
+    stop();
+    overlay.classList.remove('open');
+  }
+
+  playBtn.addEventListener('click', openGame);
+  closeBtn.addEventListener('click', closeGame);
+  overlay.addEventListener('click', e => { if (e.target === overlay) closeGame(); });
+
+  function steer(x, y) {
+    if (!alive && !waiting) return;
+    // disallow reversing into yourself
+    if (x === -dir.x && y === -dir.y) return;
+    nextDir = { x, y };
+    if (waiting) begin();
+  }
+
+  addEventListener('keydown', e => {
+    if (!overlay.classList.contains('open')) return;
+    if (e.key === 'Escape') return closeGame();
+    const map = {
+      ArrowUp: [0, -1], ArrowDown: [0, 1], ArrowLeft: [-1, 0], ArrowRight: [1, 0],
+      w: [0, -1], s: [0, 1], a: [-1, 0], d: [1, 0]
+    };
+    const v = map[e.key];
+    if (!v) return;
+    e.preventDefault();
+    steer(v[0], v[1]);
+  });
+
+  let touchStart = null;
+  canvas.addEventListener('pointerdown', e => { touchStart = { x: e.clientX, y: e.clientY }; });
+  canvas.addEventListener('pointerup', e => {
+    if (!touchStart) return;
+    const dx = e.clientX - touchStart.x, dy = e.clientY - touchStart.y;
+    touchStart = null;
+    if (Math.abs(dx) < 12 && Math.abs(dy) < 12) { prepare(); return; }
+    Math.abs(dx) > Math.abs(dy) ? steer(Math.sign(dx), 0) : steer(0, Math.sign(dy));
+  });
+
+  render(false);
+})();
+</script>
+</body>
+</html>
